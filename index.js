@@ -34,9 +34,9 @@ bot.on('message', async (msg) => {
     await bot.sendMessage(chatId, "Generating high-quality image... Please wait.");
 
     try {
-      // Improved prompt + better settings
-      const enhancedPrompt = `${prompt}, highly detailed, sharp focus, high quality, 8k`;
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(enhancedPrompt)}?width=1280&height=1280&model=flux&nologo=true&enhance=true`;
+      const enhancedPrompt = `${prompt}, highly detailed, sharp focus, intricate details, full body, complete scene, high quality, 8k`;
+      const seed = Math.floor(Math.random() * 999999999); // Random seed so every image is different
+      const imageUrl = `https://image.pollinations.ai/prompt/\( {encodeURIComponent(enhancedPrompt)}?width=1280&height=1280&model=flux&nologo=true&enhance=true&seed= \){seed}`;
 
       await bot.sendPhoto(chatId, imageUrl);
     } catch (error) {
