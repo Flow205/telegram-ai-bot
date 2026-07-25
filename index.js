@@ -1,16 +1,18 @@
 require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const Groq = require('groq-sdk');
+const Replicate = require('replicate');
 
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN });
 
 bot.onText(/\/start/, (msg) => {
   bot.sendMessage(msg.chat.id, 
 `Welcome! 
 
 • Just send me a message → I’ll reply like a helpful AI
-• Send /image followed by a description → I’ll generate an AI image
+• Send /image followed by a description → I’ll generate a high-quality AI image
 
 Example:
 /image a beautiful young woman wearing sunglasses on the beach`
@@ -23,7 +25,7 @@ bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text.trim();
 
-  // Image generation
+  // Image generation with Replicate
   if (text.toLowerCase().startsWith('/image')) {
     const prompt = text.replace(/^\/image\s*/i, '').trim();
 
@@ -31,13 +33,23 @@ bot.on('message', async (msg) => {
       return bot.sendMessage(chatId, "Please provide a description.\nExample: /image a beautiful girl on the beach");
     }
 
-    await bot.sendMessage(chatId, "Generating image... Please wait.");
+    await bot.sendMessage(chatId, "Generating high-quality image... Please wait.");
 
     try {
-      const seed = Date.now();
-      const imageUrl = `https://image.pollinations.ai/prompt/\( {encodeURIComponent(prompt)}?width=1024&height=1024&model=flux&nologo=true&seed= \){seed}`;
+      const output = await replicate.run(
+        "black-forest-labs/flux-schnell",
+        {
+          input: {
+            prompt: prompt,
+            num_outputs: 1,
+            aspect_ratio: "1:1",
+            output_format: "jpg",
+            output_quality: 90
+          }
+        }
+      );
 
-      await bot.sendPhoto(chatId, imageUrl);
+      await bot.sendPhoto(chatId, output[0]);
     } catch (error) {
       console.error(error);
       bot.sendMessage(chatId, "Sorry, there was an error generating the image. Please try again.");
