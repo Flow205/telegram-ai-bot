@@ -10,10 +10,10 @@ bot.onText(/\/start/, (msg) => {
 `Welcome! 
 
 • Just send me a message → I’ll reply like a helpful AI
-• Send /image followed by a description → I’ll generate a high-quality AI image
+• Send /image followed by a description → I’ll generate an AI image
 
 Example:
-/image a beautiful young woman wearing sunglasses on the beach, full body`
+/image a beautiful young woman wearing sunglasses on the beach`
   );
 });
 
@@ -31,17 +31,13 @@ bot.on('message', async (msg) => {
       return bot.sendMessage(chatId, "Please provide a description.\nExample: /image a beautiful girl on the beach");
     }
 
-    await bot.sendMessage(chatId, "Generating high-quality image... Please wait a moment.");
+    await bot.sendMessage(chatId, "Generating image... Please wait.");
 
     try {
-      const enhancedPrompt = `${prompt}, full body shot, highly detailed face, perfect anatomy, intricate details, sharp focus, professional photography, 8k resolution, cinematic lighting`;
-      const seed = Date.now() + Math.floor(Math.random() * 100000);
-      
-      const imageUrl = `https://image.pollinations.ai/prompt/\( {encodeURIComponent(enhancedPrompt)}?width=1024&height=1280&model=flux&nologo=true&enhance=true&seed= \){seed}&guidance=7`;
+      const seed = Date.now();
+      const imageUrl = `https://image.pollinations.ai/prompt/\( {encodeURIComponent(prompt)}?width=1024&height=1024&model=flux&nologo=true&seed= \){seed}`;
 
-      await bot.sendPhoto(chatId, imageUrl, {
-        caption: `Prompt: ${prompt}`
-      });
+      await bot.sendPhoto(chatId, imageUrl);
     } catch (error) {
       console.error(error);
       bot.sendMessage(chatId, "Sorry, there was an error generating the image. Please try again.");
