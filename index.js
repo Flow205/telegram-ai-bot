@@ -10,7 +10,7 @@ bot.onText(/\/start/, (msg) => {
 `Welcome! 
 
 • Just send me a message → I’ll reply like a helpful AI
-• Send /image followed by a description → I’ll generate an AI image
+• Send /image followed by a description → I’ll generate a high-quality AI image
 
 Example:
 /image a cute cat wearing sunglasses on the beach`
@@ -31,10 +31,13 @@ bot.on('message', async (msg) => {
       return bot.sendMessage(chatId, "Please provide a description.\nExample: /image a futuristic city at night");
     }
 
-    await bot.sendMessage(chatId, "Generating image... Please wait.");
+    await bot.sendMessage(chatId, "Generating high-quality image... Please wait.");
 
     try {
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
+      // Improved prompt + better settings
+      const enhancedPrompt = `${prompt}, highly detailed, sharp focus, high quality, 8k`;
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(enhancedPrompt)}?width=1280&height=1280&model=flux&nologo=true&enhance=true`;
+
       await bot.sendPhoto(chatId, imageUrl);
     } catch (error) {
       console.error(error);
@@ -43,7 +46,7 @@ bot.on('message', async (msg) => {
     return;
   }
 
-  // Text AI reply with better personality
+  // Text AI reply
   try {
     await bot.sendChatAction(chatId, 'typing');
 
