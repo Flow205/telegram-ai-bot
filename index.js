@@ -1,27 +1,73 @@
 require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
+const Groq = require('groq-sdk');
 
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 bot.onText(/\/start/, (msg) => {
-  bot.sendMessage(msg.chat.id, "Welcome! Send any text to generate an AI image.");
+  bot.sendMessage(msg.chat.id, 
+`Welcome! 
+
+• Just send me a message → I’ll reply like an AI assistant
+• Send /image followed by a description → I’ll generate an AI image
+
+Example:
+/image a cute cat wearing sunglasses on the beach`
+  );
 });
 
 bot.on('message', async (msg) => {
-  if (!msg.text || msg.text.startsWith('/')) return;
+  if (!msg.text || msg.text.startsWith('/start')) return;
 
   const chatId = msg.chat.id;
-  await bot.sendMessage(chatId, "Generating image... Please wait.");
+  const text = msg.text.trim();
 
+  // Image generation command
+  if (text.toLowerCase().startsWith('/image')) {
+    const prompt = text.replace(/^\/image\s*/i, '').trim();
+
+    if (!prompt) {
+      return bot.sendMessage(chatId, "Please provide a description.\nExample: /image a futuristic city at night");
+    }
+
+    await bot.sendMessage(chatId, "Generating image... Please wait.");
+
+    try {
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
+      await bot.sendPhoto(chatId, imageUrl);
+    } catch (error) {
+      console.error(error);
+      bot.sendMessage(chatId, "Sorry, there was an error generating the image.");
+    }
+    return;
+  }
+
+  // Text AI reply
   try {
-    // Free image generation using Pollinations.ai (no API key needed)
-    const prompt = encodeURIComponent(msg.text);
-    const imageUrl = `https://image.pollinations.ai/prompt/${prompt}?width=1024&height=1024&nologo=true`;
+    await bot.sendChatAction(chatId, 'typing');
 
-    await bot.sendPhoto(chatId, imageUrl);
+    const completion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: "You are a helpful, clear, and friendly AI assistant. Reply naturally and helpfully, similar to Grok."
+        },
+        {
+          role: "user",
+          content: text
+        }
+      ],
+      model: "llama-3.3-70b-versatile",
+      temperature: 0.7,
+      max_tokens: 1024
+    });
+
+    const reply = completion.choices[0]?.message?.content || "Sorry, I couldn't generate a reply.";
+    await bot.sendMessage(chatId, reply);
   } catch (error) {
     console.error(error);
-    bot.sendMessage(chatId, "Sorry, there was an error generating the image.");
+    bot.sendMessage(chatId, "Sorry, I had trouble thinking of a reply. Please try again.");
   }
 });
 
