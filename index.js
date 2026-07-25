@@ -13,7 +13,7 @@ bot.onText(/\/start/, (msg) => {
 • Send /image followed by a description → I’ll generate a high-quality AI image
 
 Example:
-/image a cute cat wearing sunglasses on the beach`
+/image a beautiful young woman wearing sunglasses on the beach, full body`
   );
 });
 
@@ -23,30 +23,33 @@ bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
   const text = msg.text.trim();
 
-  // Image generation command
+  // Image generation
   if (text.toLowerCase().startsWith('/image')) {
     const prompt = text.replace(/^\/image\s*/i, '').trim();
 
     if (!prompt) {
-      return bot.sendMessage(chatId, "Please provide a description.\nExample: /image a futuristic city at night");
+      return bot.sendMessage(chatId, "Please provide a description.\nExample: /image a beautiful girl on the beach");
     }
 
-    await bot.sendMessage(chatId, "Generating high-quality image... Please wait.");
+    await bot.sendMessage(chatId, "Generating high-quality image... Please wait a moment.");
 
     try {
-      const enhancedPrompt = `${prompt}, highly detailed, sharp focus, intricate details, full body, complete scene, high quality, 8k`;
-      const seed = Math.floor(Math.random() * 999999999); // Random seed so every image is different
-      const imageUrl = `https://image.pollinations.ai/prompt/\( {encodeURIComponent(enhancedPrompt)}?width=1280&height=1280&model=flux&nologo=true&enhance=true&seed= \){seed}`;
+      const enhancedPrompt = `${prompt}, full body shot, highly detailed face, perfect anatomy, intricate details, sharp focus, professional photography, 8k resolution, cinematic lighting`;
+      const seed = Date.now() + Math.floor(Math.random() * 100000);
+      
+      const imageUrl = `https://image.pollinations.ai/prompt/\( {encodeURIComponent(enhancedPrompt)}?width=1024&height=1280&model=flux&nologo=true&enhance=true&seed= \){seed}&guidance=7`;
 
-      await bot.sendPhoto(chatId, imageUrl);
+      await bot.sendPhoto(chatId, imageUrl, {
+        caption: `Prompt: ${prompt}`
+      });
     } catch (error) {
       console.error(error);
-      bot.sendMessage(chatId, "Sorry, there was an error generating the image.");
+      bot.sendMessage(chatId, "Sorry, there was an error generating the image. Please try again.");
     }
     return;
   }
 
-  // Text AI reply
+  // Text AI
   try {
     await bot.sendChatAction(chatId, 'typing');
 
