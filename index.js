@@ -9,7 +9,7 @@ bot.onText(/\/start/, (msg) => {
   bot.sendMessage(msg.chat.id, 
 `Welcome! 
 
-• Just send me a message → I’ll reply like an AI assistant
+• Just send me a message → I’ll reply like a helpful AI
 • Send /image followed by a description → I’ll generate an AI image
 
 Example:
@@ -43,7 +43,7 @@ bot.on('message', async (msg) => {
     return;
   }
 
-  // Text AI reply
+  // Text AI reply with better personality
   try {
     await bot.sendChatAction(chatId, 'typing');
 
@@ -51,7 +51,10 @@ bot.on('message', async (msg) => {
       messages: [
         {
           role: "system",
-          content: "You are a helpful, clear, and friendly AI assistant. Reply naturally and helpfully, similar to Grok."
+          content: `You are a helpful, clear, and slightly witty AI assistant built by xAI. 
+Reply in a natural, friendly, and direct way — similar to Grok. 
+Be honest, useful, and avoid being overly formal or robotic. 
+Keep answers concise unless the user asks for more detail.`
         },
         {
           role: "user",
